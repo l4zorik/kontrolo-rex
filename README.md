@@ -5,6 +5,7 @@ Expo / React Native MVP ovladače pro seznam projektů z cloudového app skladu.
 ## MVP obrazovky
 
 - Cloud Vault: demo importované projekty ve dvousloupcovém přehledu, filtry podle stavu, hledání a řazení podle deploye, MRR nebo stars.
+- Planpoints: pátá produktová část se checklistem roadmapy rozděleným do fází; odškrtávání a souhrn postupu jsou zatím pouze lokální demo stav.
 - Detail projektu: demo stack, metriky, deploy, Runs/Automations a přepínač viditelnosti portfolio preview.
 - Portfolio: lokální read-only náhled projektů označených jako veřejné.
 - Scoped Remote: kontext vybrané appky, ukázkový AI composer a rychlý přístup k Models, Agents, Automate a GitHub.
