@@ -14,7 +14,7 @@ type ProductApp = {
   description: string; deploy: string; health: boolean;
 };
 
-type Tab = 'Vault' | 'Portfolio' | 'Remote';
+type Tab = 'Vault' | 'Portfolio' | 'Remote' | 'Business';
 const initialApps: ProductApp[] = [
   { id: '1', name: 'Flowboard', slug: 'flowboard', tagline: 'Klidnější plánování pro malé týmy.', status: 'LIVE', stack: ['Next.js', 'Supabase', 'OpenAI'], stars: 128, issues: 3, mrr: 420, users: 842, public: true, featured: true, icon: 'F', color: '#6658E8', liveUrl: 'flowboard.app', description: 'Lehký týmový prostor, který pomáhá převést nápady do přehledných plánů. Navržený pro soustředěnou práci bez zbytečného šumu.', deploy: 'Před 2 h', health: true },
   { id: '2', name: 'Promptbase', slug: 'promptbase', tagline: 'Prompty, které se neztratí.', status: 'BUILDING', stack: ['Expo', 'Node.js', 'SQLite'], stars: 42, issues: 8, mrr: 0, users: 56, public: true, featured: false, icon: 'P', color: '#13A88A', liveUrl: 'promptbase.dev', description: 'Osobní knihovna promptů s verzováním, štítky a rychlým sdílením s týmem.', deploy: 'Včera', health: true },
@@ -126,6 +126,8 @@ export default function App() {
             <View style={styles.formHint}><Text style={styles.formHintText}>STATUS  ·  IDEA</Text><Text style={styles.formHintText}>VISIBILITY  ·  PRIVATE</Text></View>
             <Action title="Přidat demo projekt  →" onPress={addApp} />
           </ScrollView>
+        ) : tab === 'Business' ? (
+          <BusinessManagement apps={apps} notify={notify} />
         ) : tab === 'Remote' ? (
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
             <Header kicker="PRACOVNÍ PROSTOR" title="Remote" subtitle="Ovládací centrum pro tvé projekty." />
@@ -154,12 +156,112 @@ export default function App() {
           </ScrollView>
         )}
         {!showNew && <FloatingAIChat onBuildReady={() => notify('Demo build dokončen · v reálné verzi přijde oznámení z cloudu.')} />}
-        <View style={styles.bottomNav}>{(['Vault', 'Portfolio', 'Remote'] as Tab[]).map((t, i) => <Pressable key={t} onPress={() => { setTab(t); setShowNew(false); if (t === 'Vault' || t === 'Portfolio') setSelected(null); }} style={styles.navItem}><Text style={[styles.navIcon, tab === t && styles.navActive]}>{['▦', '◫', '⌘'][i]}</Text><Text style={[styles.navText, tab === t && styles.navActive]}>{t}</Text>{tab === t && <View style={styles.navMarker} />}</Pressable>)}</View>
+        <View style={styles.bottomNav}>{(['Vault', 'Portfolio', 'Business', 'Remote'] as Tab[]).map((t, i) => <Pressable key={t} onPress={() => { setTab(t); setShowNew(false); if (t === 'Vault' || t === 'Portfolio') setSelected(null); }} style={styles.navItem}><Text style={[styles.navIcon, tab === t && styles.navActive]}>{['▦', '◫', '◆', '⌘'][i]}</Text><Text style={[styles.navText, tab === t && styles.navActive]}>{t}</Text>{tab === t && <View style={styles.navMarker} />}</Pressable>)}</View>
         {toast ? <View style={styles.toast}><Text style={styles.toastText}>{toast}</Text></View> : null}
       </View>
     </SafeAreaView>
   );
 }
+type TeamMember = { name: string; role: string; initials: string; color: string };
+const teamMembers: TeamMember[] = [
+  { name: 'Marek Novák', role: 'Founder · CEO', initials: 'MN', color: '#6658E8' },
+  { name: 'Eva Dvořáková', role: 'Product Designer', initials: 'ED', color: '#13A88A' },
+  { name: 'Tomáš Horák', role: 'Full‑stack Dev', initials: 'TH', color: '#E59C45' },
+  { name: 'Lucie Černá', role: 'Marketing', initials: 'LČ', color: '#D66B5D' },
+];
+type Milestone = { label: string; date: string; done: boolean };
+const milestones: Milestone[] = [
+  { label: 'Flowboard v1.0 launch', date: 'Q1 2026', done: true },
+  { label: 'Promptbase beta release', date: 'Q2 2026', done: false },
+  { label: 'Northstar prototype', date: 'Q3 2026', done: false },
+  { label: 'Marketplace MVP', date: 'Q4 2026', done: false },
+];
+type Expense = { category: string; amount: number; color: string };
+const expenses: Expense[] = [
+  { category: 'Hosting', amount: 340, color: '#6658E8' },
+  { category: 'AI API', amount: 180, color: '#13A88A' },
+  { category: 'Marketing', amount: 90, color: '#E59C45' },
+  { category: 'Nástroje', amount: 45, color: '#D66B5D' },
+];
+
+function BusinessManagement({ apps, notify }: { apps: ProductApp[]; notify: (m: string) => void }) {
+  const totalMRR = apps.reduce((sum, a) => sum + a.mrr, 0);
+  const totalUsers = apps.reduce((sum, a) => sum + a.users, 0);
+  const totalStars = apps.reduce((sum, a) => sum + a.stars, 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const profit = totalMRR - totalExpenses;
+  const maxExpense = Math.max(...expenses.map(e => e.amount), 1);
+  const liveApps = apps.filter(a => a.status === 'LIVE').length;
+  const completedMilestones = milestones.filter(m => m.done).length;
+
+  return (
+    <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
+      <View style={styles.header}>
+        <View style={styles.headerTop}><View style={styles.brand}><View style={styles.brandMark}><View style={styles.brandMarkInner} /></View><Text style={styles.brandName}>VAULT / STUDIO</Text></View><Pressable onPress={() => notify('Lokální demo režim')} style={styles.avatar}><Text style={styles.avatarText}>M</Text></Pressable></View>
+        <Text style={styles.kicker}>BYZNYS  /  DEMO DATA</Text><Text style={styles.pageTitle}>Business.</Text><Text style={styles.subtitle}>Přehled příjmů, výdajů, týmu a milníků napříč projekty.</Text>
+      </View>
+
+      <View style={styles.bizRevenueCard}>
+        <View style={styles.bizRevenueTop}><View><Text style={styles.bizRevenueLabel}>CELKOVÉ MRR</Text><Text style={styles.bizRevenueValue}>${totalMRR}</Text></View><View style={styles.bizProfitBadge}><Text style={styles.bizProfitDot}>●</Text><Text style={styles.bizProfitText}>${profit >= 0 ? '+' : ''}{profit} zisk</Text></View></View>
+        <View style={styles.bizRevenueStats}><View style={styles.bizRevenueStat}><Text style={styles.bizRevenueStatValue}>{totalUsers.toLocaleString()}</Text><Text style={styles.bizRevenueStatLabel}>UŽIVATELÉ</Text></View><View style={styles.bizRevenueStat}><Text style={styles.bizRevenueStatValue}>{totalStars}</Text><Text style={styles.bizRevenueStatLabel}>STARS</Text></View><View style={styles.bizRevenueStat}><Text style={styles.bizRevenueStatValue}>{liveApps}</Text><Text style={styles.bizRevenueStatLabel}>LIVE</Text></View></View>
+      </View>
+
+      <SectionTitle title="Příjmy podle projektů" />
+      <View style={styles.bizSection}>
+        {apps.filter(a => a.mrr > 0).length ? apps.filter(a => a.mrr > 0).map(item => {
+          const pct = totalMRR > 0 ? Math.round((item.mrr / totalMRR) * 100) : 0;
+          return (
+            <View key={item.id} style={styles.bizRevenueRow}>
+              <View style={[styles.bizRevenueDot, { backgroundColor: item.color }]} />
+              <Text style={styles.bizRevenueName}>{item.name}</Text>
+              <View style={styles.bizRevenueBar}><View style={[styles.bizRevenueBarFill, { width: `${pct}%`, backgroundColor: item.color }]} /></View>
+              <Text style={styles.bizRevenueAmount}>${item.mrr}</Text>
+              <Text style={styles.bizRevenuePct}>{pct}%</Text>
+            </View>
+          );
+        }) : <Text style={styles.bodyText}>Zatím žádné příjmy. Spusť projekt do LIVE.</Text>}
+      </View>
+
+      <SectionTitle title="Výdaje" trailing={`${totalExpenses}/měs`} />
+      <View style={styles.bizSection}>
+        {expenses.map(e => (
+          <View key={e.category} style={styles.bizExpenseRow}>
+            <View style={{ flex: 1 }}>
+              <View style={styles.bizExpenseTop}><Text style={styles.bizExpenseName}>{e.category}</Text><Text style={styles.bizExpenseAmount}>${e.amount}</Text></View>
+              <View style={styles.bizExpenseBar}><View style={[styles.bizExpenseBarFill, { width: `${Math.round((e.amount / maxExpense) * 100)}%`, backgroundColor: e.color }]} /></View>
+            </View>
+          </View>
+        ))}
+        <View style={styles.bizExpenseSummary}><Text style={styles.bizExpenseNetLabel}>ČISTÝ ZISK</Text><Text style={[styles.bizExpenseNetValue, { color: profit >= 0 ? '#18865B' : '#BC4B45' }]}>${profit}/měs</Text></View>
+      </View>
+
+      <SectionTitle title="Tým" trailing={`${teamMembers.length} ČLENŮ`} />
+      <View style={styles.bizSection}>
+        {teamMembers.map(m => (
+          <View key={m.name} style={styles.bizTeamRow}>
+            <View style={[styles.bizTeamAvatar, { backgroundColor: m.color }]}><Text style={styles.bizTeamInitials}>{m.initials}</Text></View>
+            <View style={{ flex: 1 }}><Text style={styles.bizTeamName}>{m.name}</Text><Text style={styles.bizTeamRole}>{m.role}</Text></View>
+            <Pressable onPress={() => notify('Profil člena týmu bude dostupný v další verzi.')}><Text style={styles.arrow}>↗</Text></Pressable>
+          </View>
+        ))}
+        <Pressable onPress={() => notify('Pozvání člena týmu bude dostupné v další verzi.')} style={styles.bizTeamInvite}><Text style={styles.bizTeamInviteText}>＋  Pozvat člena</Text></Pressable>
+      </View>
+
+      <SectionTitle title="Milníky" trailing={`${completedMilestones}/${milestones.length}`} />
+      <View style={styles.bizSection}>
+        {milestones.map((m, i) => (
+          <View key={i} style={styles.bizMilestoneRow}>
+            <View style={[styles.bizMilestoneDot, m.done && styles.bizMilestoneDotDone]}><Text style={styles.bizMilestoneDotText}>{m.done ? '✓' : ''}</Text></View>
+            <View style={{ flex: 1 }}><Text style={[styles.bizMilestoneLabel, m.done && styles.bizMilestoneLabelDone]}>{m.label}</Text><Text style={styles.bizMilestoneDate}>{m.date}</Text></View>
+          </View>
+        ))}
+      </View>
+
+      <View style={styles.notice}><Text style={styles.noticeTitle}>Business · demo data</Text><Text style={styles.noticeBody}>Příjmy, výdaje, tým a milníky jsou ukázkové. Skutečné napojení na platby, fakturaci a projektový management přijde v další verzi.</Text></View>
+    </ScrollView>
+  );
+}
+
 function SectionTitle({ title, trailing, onTrailing }: { title: string; trailing?: string; onTrailing?: () => void }) {
   return <View style={styles.sectionTitleRow}><Text style={styles.sectionTitle}>{title}</Text>{trailing && <Pressable onPress={onTrailing}><Text style={styles.sectionTrailing}>{trailing}</Text></Pressable>}</View>;
 }
@@ -192,4 +294,10 @@ const styles = StyleSheet.create({
   empty: { alignItems: 'center', paddingVertical: 38, paddingHorizontal: 18 }, emptyMark: { color: '#6658E8', fontSize: 31 }, emptyTitle: { color: ink, fontSize: 18, fontWeight: '700', marginTop: 9 }, emptyBody: { color: muted, fontSize: 12, textAlign: 'center', lineHeight: 18, marginTop: 5, marginBottom: 17 },
   formField: { marginTop: 22 }, formLabel: { color: '#858992', fontSize: 9, letterSpacing: 1.1, fontWeight: '700', marginBottom: 8 }, formInput: { height: 48, backgroundColor: '#FFF', borderWidth: 1, borderColor: line, borderRadius: 10, paddingHorizontal: 13, color: ink, fontSize: 13 }, formHint: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 18, marginBottom: 22 }, formHintText: { color: '#9699A0', fontSize: 8, letterSpacing: 0.7, fontWeight: '700' }, toast: { position: 'absolute', bottom: 78, left: 24, right: 24, backgroundColor: '#272932', paddingVertical: 13, paddingHorizontal: 15, borderRadius: 10, alignItems: 'center' }, toastText: { color: '#FFF', fontSize: 11, fontWeight: '600' },
   label: { color: muted },
+  bizRevenueCard: { backgroundColor: '#22242D', borderRadius: 16, paddingHorizontal: 18, paddingVertical: 16, marginBottom: 17 }, bizRevenueTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start' }, bizRevenueLabel: { color: '#B6B7C0', fontSize: 9, fontWeight: '700', letterSpacing: 1.4 }, bizRevenueValue: { color: '#FFF', fontSize: 32, fontWeight: '700', marginTop: 4 }, bizProfitBadge: { flexDirection: 'row', alignItems: 'center', gap: 5, backgroundColor: 'rgba(91,211,157,0.15)', borderRadius: 10, paddingHorizontal: 9, paddingVertical: 6, marginTop: 4 }, bizProfitDot: { color: '#5BD39D', fontSize: 8 }, bizProfitText: { color: '#74DBA9', fontSize: 10, fontWeight: '700' }, bizRevenueStats: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16, paddingTop: 14, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.08)' }, bizRevenueStat: { alignItems: 'center' }, bizRevenueStatValue: { color: '#FFF', fontSize: 16, fontWeight: '700' }, bizRevenueStatLabel: { color: '#9095A0', fontSize: 8, letterSpacing: 1, fontWeight: '700', marginTop: 3 },
+  bizSection: { backgroundColor: '#FFF', borderWidth: 1, borderColor: line, borderRadius: 14, padding: 15, marginBottom: 4 },
+  bizRevenueRow: { flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F2F2EF' }, bizRevenueDot: { width: 8, height: 8, borderRadius: 4 }, bizRevenueName: { color: ink, fontSize: 11, fontWeight: '600', minWidth: 70 }, bizRevenueBar: { flex: 1, height: 6, backgroundColor: '#F0F0ED', borderRadius: 3, overflow: 'hidden' }, bizRevenueBarFill: { height: '100%', borderRadius: 3 }, bizRevenueAmount: { color: ink, fontSize: 11, fontWeight: '700', minWidth: 40, textAlign: 'right' }, bizRevenuePct: { color: '#92959C', fontSize: 9, minWidth: 30, textAlign: 'right' },
+  bizExpenseRow: { paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: '#F2F2EF' }, bizExpenseTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }, bizExpenseName: { color: ink, fontSize: 11, fontWeight: '600' }, bizExpenseAmount: { color: ink, fontSize: 11, fontWeight: '700' }, bizExpenseBar: { height: 6, backgroundColor: '#F0F0ED', borderRadius: 3, overflow: 'hidden' }, bizExpenseBarFill: { height: '100%', borderRadius: 3 }, bizExpenseSummary: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 11, paddingTop: 11, borderTopWidth: 1, borderTopColor: line }, bizExpenseNetLabel: { color: '#93969C', fontSize: 9, letterSpacing: 1, fontWeight: '700' }, bizExpenseNetValue: { fontSize: 14, fontWeight: '700' },
+  bizTeamRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: '#F2F2EF' }, bizTeamAvatar: { width: 38, height: 38, borderRadius: 11, alignItems: 'center', justifyContent: 'center' }, bizTeamInitials: { color: '#FFF', fontSize: 12, fontWeight: '800' }, bizTeamName: { color: ink, fontSize: 12, fontWeight: '700' }, bizTeamRole: { color: muted, fontSize: 10, marginTop: 2 }, bizTeamInvite: { alignItems: 'center', paddingVertical: 13, marginTop: 5, borderWidth: 1, borderColor: '#E4E1F6', borderStyle: 'dashed', borderRadius: 11 }, bizTeamInviteText: { color: '#6658E8', fontSize: 11, fontWeight: '700' },
+  bizMilestoneRow: { flexDirection: 'row', alignItems: 'center', gap: 11, paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: '#F2F2EF' }, bizMilestoneDot: { width: 22, height: 22, borderRadius: 7, borderWidth: 1.5, borderColor: '#D5D6D2', alignItems: 'center', justifyContent: 'center' }, bizMilestoneDotDone: { backgroundColor: '#18865B', borderColor: '#18865B' }, bizMilestoneDotText: { color: '#FFF', fontSize: 12, fontWeight: '800' }, bizMilestoneLabel: { color: ink, fontSize: 12, fontWeight: '600' }, bizMilestoneLabelDone: { textDecorationLine: 'line-through', color: '#A6A8AF' }, bizMilestoneDate: { color: muted, fontSize: 10, marginTop: 2 },
 });
